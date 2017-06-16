@@ -209,8 +209,27 @@ hr {
 myths &lt;- data.frame(myth = c(&quot;Bigfoot&quot;, &quot;UFO&quot;, &quot;Loch Ness Monster&quot;), 
                     claim = c(&quot;various&quot;, &quot;day&quot;, &quot;day&quot;), 
                     note = c(&quot;various&quot;, &quot;pictures&quot;, &quot;reported day&quot;))
-out = wildcard(myths, wildcard = &quot;day&quot;, values = c(&quot;today&quot;, &quot;yesterday&quot;))
-wildcard(myths, wildcard = &quot;day&quot;, values = c(&quot;today&quot;, &quot;yesterday&quot;), expand = FALSE)
+myths
+</code></pre>
+
+<pre><code>##                myth   claim         note
+## 1           Bigfoot various      various
+## 2               UFO     day     pictures
+## 3 Loch Ness Monster     day reported day
+</code></pre>
+
+<pre><code class="r">wildcard(myths, wildcard = &quot;day&quot;, values = c(&quot;today&quot;, &quot;yesterday&quot;))
+</code></pre>
+
+<pre><code>##                myth     claim               note
+## 1           Bigfoot   various            various
+## 2               UFO     today           pictures
+## 3               UFO yesterday           pictures
+## 4 Loch Ness Monster     today     reported today
+## 5 Loch Ness Monster yesterday reported yesterday
+</code></pre>
+
+<pre><code class="r">wildcard(myths, wildcard = &quot;day&quot;, values = c(&quot;today&quot;, &quot;yesterday&quot;), expand = FALSE)
 </code></pre>
 
 <pre><code>##                myth     claim           note
