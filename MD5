@@ -1,12 +1,12 @@
-45b1a1a16f49cbfc0269f7b54b1d5add *DESCRIPTION
+0db824a55fdf7559531233cb5700b672 *DESCRIPTION
 d4601ac540a680d315883ffc7428875a *NAMESPACE
 f851d18a3b0869d8808a4634ace78384 *R/namespace.R
 5bd43b8e62bdd29d91b7cacf448c4f78 *R/ui.R
 5f32169a5cd6b714855be46e17b2514d *R/utils.R
 8b82aa7edf224da89cfc3014ad2fab32 *build/vignette.rds
 9ca82e4ec3177b6396d74a17c3edcf88 *inst/doc/wildcard.R
-f8e0344a3956bc2e1c1ab19f7a46e105 *inst/doc/wildcard.Rmd
-5beea9cf0bab1a5d37cb984aeb180f93 *inst/doc/wildcard.html
+078889417370869008bc0555b5ad3ed0 *inst/doc/wildcard.Rmd
+4e56a2abdea7d49c7d8864995be31219 *inst/doc/wildcard.html
 21a9f71dd3de94ce4d3d5a92954d3382 *man/expandrows.Rd
 2112a818631a7bf6caddb2caee4c7c76 *man/nofactors.Rd
 e77a74f4fa4097b23310240a58a9840e *man/wildcard.Rd
@@ -14,4 +14,5 @@ e77a74f4fa4097b23310240a58a9840e *man/wildcard.Rd
 4753ca04806ef78a8865ed2a5b34a9a7 *tests/testthat/test-edge-cases.R
 babb0524373c383028ac0af747ef479a *tests/testthat/test-examples.R
 56a590fe3af062a0b7478afff82c0327 *tests/testthat/test-wildcard.R
-f8e0344a3956bc2e1c1ab19f7a46e105 *vignettes/wildcard.Rmd
+897c48c6771cacf5b85d645e61069967 *vignettes/logo-vignette.png
+078889417370869008bc0555b5ad3ed0 *vignettes/wildcard.Rmd
