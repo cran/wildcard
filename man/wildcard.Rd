@@ -5,7 +5,7 @@
 \title{Function \code{wildcard}}
 \usage{
 wildcard(df, rules = NULL, wildcard = NULL, values = NULL,
-  expand = TRUE)
+  expand = TRUE, include = NULL, exclude = NULL)
 }
 \arguments{
 \item{df}{data frame}
@@ -17,25 +17,45 @@ to substitute in place of the wildcards.}
 
 \item{values}{vector of values to substitute in place of a wildcard}
 
-\item{expand}{logical, whether to expand the rows of the data frame to substitute
-each value for each wildcard in turn. If \code{FALSE}, no new rows
-will be added to \code{df} when the values are substituted in place
-of wildcards. Can be a vector of length \code{length(rules)} if using the \code{rules}
-argument.}
+\item{expand}{logical, whether to expand the rows of the data frame to
+substitute each value for each wildcard in turn.
+If \code{FALSE}, no new rows will be added to \code{df}
+when the values are substituted in place of wildcards.
+Can be a vector of length \code{length(rules)}
+if using the \code{rules} argument.}
+
+\item{include}{character vector of columns of \code{df}
+to be included in the wildcard evaluation.
+The values will replace the wildcards in these columns
+but not in any of the other colums.
+All columns are included by default.
+You may use \code{include} or \code{exclude} (or neither),
+but not both.}
+
+\item{exclude}{character vector of columns of \code{df}
+to be EXCLUDED from the wildcard evaluation.
+The values will NOT replace the wildcards in any of these
+columns, but wildcard evaluation will occur in all
+the other columns.
+By default, no columns are excluded (all columns
+are used for wildcard evaluation).
+You may use \code{include} or \code{exclude} (or neither),
+but not both.}
 }
 \description{
 Main function of the package. Evaluate a wildcard
 to fill in or expand a data frame.
-Copied and modified from \code{remakeGenerator::evaluate()} package under GPL-3:
+Copied and modified from \code{remakeGenerator::evaluate()} under GPL-3:
 \url{https://github.com/wlandau/remakeGenerator}
 }
 \examples{
 myths <- data.frame(
-  myth = c('Bigfoot', 'UFO', 'Loch Ness Monster'), 
-  claim = c('various', 'day', 'day'), 
+  myth = c('Bigfoot', 'UFO', 'Loch Ness Monster'),
+  claim = c('various', 'day', 'day'),
  note = c('various', 'pictures', 'reported day'))
 wildcard(myths, wildcard = 'day', values = c('today', 'yesterday'))
-wildcard(myths, wildcard = 'day', values = c('today', 'yesterday'), expand = FALSE)
+wildcard(myths, wildcard = 'day', values = c('today', 'yesterday'),
+  expand = FALSE)
 locations <- data.frame(
   myth = c('Bigfoot', 'UFO', 'Loch Ness Monster'),
   origin = 'where')
@@ -45,6 +65,11 @@ rules <- list(
 wildcard(locations, rules = rules, expand = c(FALSE, TRUE))
 numbers <- data.frame(x = 4, y = 3, z = 4444, w = 4.434)
 wildcard(numbers, wildcard = 4, values = 7)
+# Inclusion and exclusion
+wildcard(myths, wildcard = "day", values = c("today", "yesterday"),
+  include = "claim")
+wildcard(myths, wildcard = "day", values = c("today", "yesterday"),
+  exclude = c("claim", "note"))
 # Wildcards should not also be replacement values.
 # Otherwise, the output will be strange
 # and will depend on the order of the wildcards.

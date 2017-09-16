@@ -1,26 +1,44 @@
 #' @title Function \code{wildcard}
 #' @description Main function of the package. Evaluate a wildcard
 #' to fill in or expand a data frame.
-#' Copied and modified from \code{remakeGenerator::evaluate()} package under GPL-3:
+#' Copied and modified from \code{remakeGenerator::evaluate()} under GPL-3:
 #' \url{https://github.com/wlandau/remakeGenerator}
 #' @export
-#' @param df data frame 
+#' @param df data frame
 #' @param rules list with names a wildcards and elements as vectors of values
 #' to substitute in place of the wildcards.
 #' @param wildcard character scalar, a wildcard found in a data frame
 #' @param values vector of values to substitute in place of a wildcard
-#' @param expand logical, whether to expand the rows of the data frame to substitute
-#' each value for each wildcard in turn. If \code{FALSE}, no new rows
-#' will be added to \code{df} when the values are substituted in place
-#' of wildcards. Can be a vector of length \code{length(rules)} if using the \code{rules}
-#' argument.
-#' @examples 
+#' @param expand logical, whether to expand the rows of the data frame to
+#' substitute each value for each wildcard in turn.
+#' If \code{FALSE}, no new rows will be added to \code{df}
+#' when the values are substituted in place of wildcards.
+#' Can be a vector of length \code{length(rules)}
+#' if using the \code{rules} argument.
+#' @param include character vector of columns of \code{df}
+#' to be included in the wildcard evaluation.
+#' The values will replace the wildcards in these columns
+#' but not in any of the other colums.
+#' All columns are included by default.
+#' You may use \code{include} or \code{exclude} (or neither),
+#' but not both.
+#' @param exclude character vector of columns of \code{df}
+#' to be EXCLUDED from the wildcard evaluation.
+#' The values will NOT replace the wildcards in any of these
+#' columns, but wildcard evaluation will occur in all
+#' the other columns.
+#' By default, no columns are excluded (all columns
+#' are used for wildcard evaluation).
+#' You may use \code{include} or \code{exclude} (or neither),
+#' but not both.
+#' @examples
 #' myths <- data.frame(
-#'   myth = c('Bigfoot', 'UFO', 'Loch Ness Monster'), 
-#'   claim = c('various', 'day', 'day'), 
+#'   myth = c('Bigfoot', 'UFO', 'Loch Ness Monster'),
+#'   claim = c('various', 'day', 'day'),
 #'  note = c('various', 'pictures', 'reported day'))
 #' wildcard(myths, wildcard = 'day', values = c('today', 'yesterday'))
-#' wildcard(myths, wildcard = 'day', values = c('today', 'yesterday'), expand = FALSE)
+#' wildcard(myths, wildcard = 'day', values = c('today', 'yesterday'),
+#'   expand = FALSE)
 #' locations <- data.frame(
 #'   myth = c('Bigfoot', 'UFO', 'Loch Ness Monster'),
 #'   origin = 'where')
@@ -30,6 +48,11 @@
 #' wildcard(locations, rules = rules, expand = c(FALSE, TRUE))
 #' numbers <- data.frame(x = 4, y = 3, z = 4444, w = 4.434)
 #' wildcard(numbers, wildcard = 4, values = 7)
+#' # Inclusion and exclusion
+#' wildcard(myths, wildcard = "day", values = c("today", "yesterday"),
+#'   include = "claim")
+#' wildcard(myths, wildcard = "day", values = c("today", "yesterday"),
+#'   exclude = c("claim", "note"))
 #' # Wildcards should not also be replacement values.
 #' # Otherwise, the output will be strange
 #' # and will depend on the order of the wildcards.
@@ -39,14 +62,20 @@
 #' wildcard(df, rules = rules)
 #' }
 wildcard <- function(df, rules = NULL, wildcard = NULL,
-  values = NULL, expand = TRUE) {
+  values = NULL, expand = TRUE, include = NULL, exclude = NULL) {
+  df <- as.data.frame(df)
+  check_df(df)
+  include <- process_include(df = df, include = include, exclude = exclude)
+  exclude <- NULL
   stopifnot(is.logical(expand))
   if (!is.null(rules))
-    return(wildcards(df = df, rules = rules, expand = expand))
+    return(wildcards(df = df, rules = rules, expand = expand,
+      include = include, exclude = exclude))
   df <- nofactors(df)
   if (is.null(wildcard) | is.null(values))
     return(df)
-  matches <- get_matches(df, wildcard)
+  matches <- get_matches(df = df, wildcard = wildcard,
+    include = include)
   if (!any(matches))
     return(df)
   major <- unique_random_string(colnames(df))
@@ -55,10 +84,13 @@ wildcard <- function(df, rules = NULL, wildcard = NULL,
   matching <- df[matches, ]
   if (expand)
     matching <- expandrows(matching, n = length(values))
-  true_cols <- setdiff(colnames(matching), c(major, minor))
-  matching[, true_cols] <- lapply(matching[, true_cols,
-    drop = FALSE], gsub_multiple, pattern = wildcard,
-    replacement = values) %>% as.data.frame(stringsAsFactors = FALSE)
+  true_cols <- setdiff(colnames(matching), c(major, minor)) %>%
+    intersect(y = include)
+  if (length(true_cols)){
+    matching[, true_cols] <- lapply(matching[, true_cols,
+      drop = FALSE], gsub_multiple, pattern = wildcard,
+      replacement = values) %>% as.data.frame(stringsAsFactors = FALSE)
+  }
   rownames(df) <- rownames(matching) <- NULL
   matching[[minor]] <- seq_len(nrow(matching))
   out <- rbind(matching, df[!matches, ])
@@ -76,11 +108,12 @@ wildcard <- function(df, rules = NULL, wildcard = NULL,
 #' @seealso \code{\link{wildcard}}]
 #' @param df data frame
 #' @param n number of duplicates per row
-#' @param type character scalar. If \code{'each'}, rows will be duplicated in place.
-#' If \code{'times'}, the data frame itself will be repeated \code{n} times
+#' @param type character scalar. If \code{'each'},
+#' rows will be duplicated in place.
+#' If \code{'times'}, the data frame itself will be repeated \code{n} times.
 #' @examples
 #' df <- data.frame(
-#'   ID = c('24601', 'Javert', 'Fantine'), 
+#'   ID = c('24601', 'Javert', 'Fantine'),
 #'   fate = c('fulfillment', 'confusion', 'misfortune'))
 #' expandrows(df, n = 2, type = 'each')
 #' expandrows(df, n = 2, type = 'times')
